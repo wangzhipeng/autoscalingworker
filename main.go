@@ -8,12 +8,12 @@ import (
 )
 
 func main() {
-	c := make(chan interface{}, 100000)
+	c := make(chan interface{}, 1000)
 
 	auto := worker.AutoScalingWorker{
-		MinWorker:  1,
+		MinWorker:  0,
 		MaxWorker:  10,
-		QueueDepth: 100,
+		QueueDepth: 8,
 		Interval:   time.Second,
 		Process: func(i interface{}) {
 			time.Sleep(time.Millisecond * 100)
@@ -23,19 +23,23 @@ func main() {
 
 	go auto.Start()
 	go func() {
-		for n := 0; n < 10; n++ {
-			for i := 0; i < 100; i++ {
+		for n := 0; n < 5; n++ {
+			for i := 0; i < 30; i++ {
 				c <- i
 			}
 			time.Sleep(time.Second)
 		}
 
-		for n := 0; n < 10; n++ {
-			for i := 0; i < 50; i++ {
+	}()
+	go func() {
+		time.Sleep(time.Second * 15)
+		for n := 0; n < 5; n++ {
+			for i := 0; i < 30; i++ {
 				c <- i
 			}
-			time.Sleep(time.Second)
+
 		}
+
 	}()
 
 	go func() {
